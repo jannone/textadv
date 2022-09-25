@@ -76,7 +76,7 @@ class BasicWriter {
     for (let i=0; i<this.lines.length; i++) {
       output.push(`${i+1} ${this.lines[i]}`)
     }
-    return output.join("\n")
+    return output.join("\r\n")
   }
 }
 
