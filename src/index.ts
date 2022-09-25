@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { cac } from 'cac'
 import { writeFileSync } from 'fs';
 import { generateBasic } from './gen-basic.js';
