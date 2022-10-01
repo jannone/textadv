@@ -80,9 +80,27 @@ class BasicWriter {
   }
 }
 
+class Flags {
+  private flags: string[] = []
+  private dict: {[key: string]: number} = {}
+  get(name: string) {
+    if (this.dict[name] === undefined) {
+      this.dict[name] = this.flags.length
+      this.flags.push(name)
+    }
+    return `F(${this.dict[name]})`
+  }
+  getCount() {
+    return this.flags.length
+  }
+}
+
 export function generateBasic(project: Project) {
+  const flags = new Flags();
   const basic = new BasicWriter();
   basic.write("DEFINTA-Z:COLOR15,1,1:SCREEN0,,0:KEYOFF:WIDTH40")
+  const varSetupRef = basic.getLineRef()
+  basic.write("DIM ...")
   basic.write(`RM=${project.initialRoomIndex}`)
   basic.printLn(project.name)
   basic.printLn("")
@@ -107,7 +125,7 @@ export function generateBasic(project: Project) {
   // project codes
   basic.write("REM project codes")
   const projectCodesRef = basic.getLineRef()
-  generateCodes(project.postInput, basic, project, roomsOnGosubRef)
+  generateCodes(project.postInput, basic, project, roomsOnGosubRef, flags)
   basic.write("RETURN")
 
   // rooms intros
@@ -125,15 +143,17 @@ export function generateBasic(project: Project) {
   for (const room of project.rooms) {
     roomsCommandLines.push(basic.getLineRef())
     basic.write(`REM room ${room.id} codes`)
-    generateCodes(room.postInput, basic, project, roomsOnGosubRef)
+    generateCodes(room.postInput, basic, project, roomsOnGosubRef, flags)
     basic.write(`GOTO ${projectCodesRef}`)
   }
   basic.setLine(roomCmdOnGosubRef, "ON RM+1 GOSUB " + roomsCommandLines.join(","))
 
+  basic.setLine(varSetupRef, `DIM F(${flags.getCount()})`)
+
   return basic.render()
 }
 
-function generateCodes(codes: Code[], basic: BasicWriter, project: Project, checkRoomLine: number) {
+function generateCodes(codes: Code[], basic: BasicWriter, project: Project, checkRoomLine: number, flags: Flags) {
   for (const code of codes) {
     const lineRef = basic.getLineRef();
     const linesWithSkipping = [];
@@ -155,20 +175,22 @@ function generateCodes(codes: Code[], basic: BasicWriter, project: Project, chec
           basic.write(`RM=${roomIndex}`);
           break
         case "set":
-          // TODO: flag allocation
-          basic.write(`${op.params[0]}=1`);
+          const flSet = flags.get(op.params[0] as string)
+          basic.write(`${flSet}=1`);
           break
         case "clear":
-          // TODO: flag allocation
-          basic.write(`${op.params[0]}=0`);
+          const flClear = flags.get(op.params[0] as string)
+          basic.write(`${flClear}=0`);
           break
         case "zero":
+          const flZero = flags.get(op.params[0] as string)
           linesWithSkipping.push(basic.getLineRef());
-          basic.write(`IF ${op.params[0]}<>0 THEN @`);
+          basic.write(`IF ${flZero}<>0 THEN @`);
           break
         case "notzero":
+          const flNotZero = flags.get(op.params[0] as string)
           linesWithSkipping.push(basic.getLineRef());
-          basic.write(`IF ${op.params[0]}=0 THEN @`);
+          basic.write(`IF ${flNotZero}=0 THEN @`);
           break
         case "continue":
           linesWithSkipping.push(basic.getLineRef());
