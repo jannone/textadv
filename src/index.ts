@@ -9,12 +9,15 @@ import { parseFile } from './parser.js';
 const cli = cac('textadv')
 
 cli.command('<file>', 'Input file to generate a Text Adventure from')
-  .option('--lang <lang>', 'Target language', {default: 'basic'})
+  .option('--target <target>', 'Target language', {default: 'basic'})
   .option('--output <file>', 'Output file path')
   .action(async (file, options) => {
-    const project = await parseFile(file)
+    const { project, mdAST } = await parseFile(file)
     let generate
-    switch (options.lang) {
+    switch (options.target) {
+      case 'ast':
+        generate = () => JSON.stringify(mdAST, null, 3)
+        break
       case 'basic':
         generate = generateBasic
         break

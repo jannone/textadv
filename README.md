@@ -16,9 +16,9 @@ For more info, run any command with the `--help` flag:
   $ textadv --help
 
 Options:
-  --lang <lang>    Target language (default: basic)
-  --output <file>  Output file path
-  -h, --help       Display this message
+  --target <target>  Target language (default: basic)
+  --output <file>    Output file path
+  -h, --help         Display this message
 ```
 
 ## File Format

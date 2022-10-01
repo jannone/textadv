@@ -33,6 +33,7 @@ export class Room implements Node {
 export class Project extends Room {
   rooms: Room[] = []
   initialRoomIndex: number = 0 // TODO: find a way to express "initialRoomIndex" on the markdown
+  meta: any
 
   findRoomById(id: string) {
     for (const room of this.rooms) {

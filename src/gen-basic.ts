@@ -98,6 +98,13 @@ class Flags {
 export function generateBasic(project: Project) {
   const flags = new Flags();
   const basic = new BasicWriter();
+
+  if (typeof(project.meta) === 'object') {
+    for (const key in project.meta) {
+      basic.write(`' ${key}: ${project.meta[key]}`)
+    }
+  }
+
   basic.write("DEFINTA-Z:COLOR15,1,1:SCREEN0,,0:KEYOFF:WIDTH40")
   const varSetupRef = basic.getLineRef()
   basic.write("DIM ...")

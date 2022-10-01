@@ -1,6 +1,7 @@
 import * as fs from 'fs'
 import { unified } from 'unified'
 import remarkParse from 'remark-parse'
+import * as YAML from 'yaml'
 
 import { Root } from 'remark-parse/lib';
 import { ListItem } from 'mdast';
@@ -8,9 +9,16 @@ import { Cmd, Code, Node, Op, Project, Room } from './types.js';
 import { removeDiacritics } from './utils.js';
 
 async function parse(ast: Root, project: Project) {
+  let inMeta = false
+  let childIndex = 0
   let node: Node = project
   if (ast.type !== 'root') throw new Error('expected root node as parameter')
   for (const child of ast.children) {
+    ++childIndex
+    if (child.type === 'thematicBreak' && childIndex === 1) {
+      inMeta = true
+      continue
+    }
     if (child.type === 'heading' && child.depth === 1) {
       // intro block
       const { id, name } = parseTitle((child.children[0] as any).value)
@@ -18,6 +26,11 @@ async function parse(ast: Root, project: Project) {
       project.name = name
     }
     if (child.type === 'heading' && child.depth === 2) {
+      if (inMeta) {
+        inMeta = false
+        project.meta = parseMeta((child.children[0] as any).value)
+        continue
+      }
       // location block
       const { id, name } = parseTitle((child.children[0] as any).value)
       const newRoom = project.findRoomById(id) ?? new Room()
@@ -149,10 +162,22 @@ function validate(project: Project) {
   return errors
 }
 
-export async function parseFile(path: string, project?: Project) {
+async function parseMD(path: string) {
   const src = fs.readFileSync(path, 'utf8')
   const mdAST = unified()
     .use(remarkParse)
     .parse(src);
-  return parse(mdAST, project ?? new Project())
+  return mdAST
+}
+
+export async function parseFile(path: string, project?: Project) {
+  const mdAST = await parseMD(path)
+  return {
+    project: await parse(mdAST, project ?? new Project()),
+    mdAST
+  }
+}
+
+function parseMeta(value: string): any {
+  return YAML.parse(value)  
 }
