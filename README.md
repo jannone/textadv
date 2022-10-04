@@ -7,18 +7,18 @@ Text Adventures generator from Markdown files.
 
 ```
 Usage:
-  $ textadv <file>
+  $ textadv <command> [options]
 
 Commands:
-  <file>  Input file to generate a Text Adventure from
+  gen <file>  Generates Text Adventure from a Markdown file
+  run <file>  Runs Text Adventure from a Markdown file
 
 For more info, run any command with the `--help` flag:
-  $ textadv --help
+  $ textadv gen --help
+  $ textadv run --help
 
 Options:
-  --target <target>  Target language (default: basic)
-  --output <file>    Output file path
-  -h, --help         Display this message
+  -h, --help  Display this message 
 ```
 
 ## File Format

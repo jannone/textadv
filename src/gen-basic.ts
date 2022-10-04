@@ -1,5 +1,5 @@
 import { Code, Project } from './types';
-import { hyphenate, removeDiacritics } from './utils.js';
+import { generateInputVariations, hyphenate, removeDiacritics } from './utils.js';
 
 class BasicWriter {
   lines: string[] = []
@@ -225,45 +225,4 @@ function generateCodes(codes: Code[], basic: BasicWriter, project: Project, chec
       basic.setLine(lineRef, `IF ${inputs.join(" AND ")} THEN ${basic.getLineRef()}`);
     }
   }
-}
-
-function generateInputVariations(on: string) {
-  const words = on.trim().split(/ +/g)
-  if (words.length === 0) {
-    return []
-  }
-
-  function generateWordVariations(word: string) {
-    const variations = []
-    const manualVariations = word.split('/')
-    for (const manualVariation of manualVariations) {
-      // match expression with format: "book(s)"
-      const autoVariations = manualVariation.match(/^(.+)\((.+)\)$/)
-      if (!autoVariations) {
-        variations.push(manualVariation)
-      } else {
-        // example: "read book" and "read books", very simple
-        variations.push(autoVariations[1])
-        variations.push(autoVariations[1] + autoVariations[2])
-      }
-    }
-    return variations
-  }
-
-  let variations: string[] = []
-  for (const word of words) {
-    const wordVariations = generateWordVariations(word)
-    if (variations.length === 0) {
-      variations = wordVariations
-      continue
-    }
-    const newVariations = []
-    for (const variation of variations) {
-      for (const wordVariation of wordVariations) {
-        newVariations.push(`${variation} ${wordVariation}`)
-      }
-    }
-    variations = newVariations
-  }
-  return variations
 }

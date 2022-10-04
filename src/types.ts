@@ -25,7 +25,7 @@ export class Room implements Node {
   id = ''
   name = ''
   preInput = []
-  postInput = []
+  postInput: Code[] = []
   aliases = {}
   intro = []
 }
@@ -45,9 +45,13 @@ export class Project extends Room {
 
   getRooms() {
     return this.rooms.reduce((prev, cur) => {
-      prev[cur.id] = cur;
-      return prev;
-    }, {} as { [key: string]: Room; });
+      prev[cur.id] = cur
+      return prev
+    }, {} as { [key: string]: Room; })
+  }
+
+  getRoom(index: number): Room {
+    return this.rooms[index]
   }
 }
 

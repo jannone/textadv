@@ -36,3 +36,44 @@ export function hyphenate(s: string) {
   }
   return hyphenatedLines
 }
+
+export function generateInputVariations(on: string) {
+  const words = on.trim().split(/ +/g)
+  if (words.length === 0) {
+    return []
+  }
+
+  function generateWordVariations(word: string) {
+    const variations = []
+    const manualVariations = word.split('/')
+    for (const manualVariation of manualVariations) {
+      // match expression with format: "book(s)"
+      const autoVariations = manualVariation.match(/^(.+)\((.+)\)$/)
+      if (!autoVariations) {
+        variations.push(manualVariation)
+      } else {
+        // example: "read book" and "read books", very simple
+        variations.push(autoVariations[1])
+        variations.push(autoVariations[1] + autoVariations[2])
+      }
+    }
+    return variations
+  }
+
+  let variations: string[] = []
+  for (const word of words) {
+    const wordVariations = generateWordVariations(word)
+    if (variations.length === 0) {
+      variations = wordVariations
+      continue
+    }
+    const newVariations = []
+    for (const variation of variations) {
+      for (const wordVariation of wordVariations) {
+        newVariations.push(`${variation} ${wordVariation}`)
+      }
+    }
+    variations = newVariations
+  }
+  return variations
+}

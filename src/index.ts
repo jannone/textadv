@@ -2,13 +2,15 @@
 
 import { cac } from 'cac'
 import { writeFileSync } from 'fs';
+import { Engine } from './engine.js';
 import { generateBasic } from './gen-basic.js';
 import { generateJson } from './gen-json.js';
 import { parseFile } from './parser.js';
+import * as readline from 'readline';
 
 const cli = cac('textadv')
 
-cli.command('<file>', 'Input file to generate a Text Adventure from')
+cli.command('gen <file>', 'Generates Text Adventure from a Markdown file')
   .option('--target <target>', 'Target language', {default: 'basic'})
   .option('--output <file>', 'Output file path')
   .action(async (file, options) => {
@@ -33,6 +35,41 @@ cli.command('<file>', 'Input file to generate a Text Adventure from')
     } else {
       console.log(output)
     }
+  })
+
+cli.command('run <file>', 'Runs Text Adventure from a Markdown file')
+  .option('--debug', 'Debug internal states')
+  .action(async (file, options) => {
+    const { project } = await parseFile(file)
+    const engine = new Engine(project)
+    let state = engine.start()
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+
+    function prompt() {
+      rl.question('> ', (input) => {
+        if (input === '/quit') {
+          return rl.close();
+        }
+        const roomIndex = state.roomIndex
+        state = engine.input(input, state)
+        const { output, ...other } = state
+        if (options.debug) {
+          console.debug('[state]', JSON.stringify(other))
+        }
+        if (state.roomIndex !== roomIndex) {
+          console.log(engine.getRoomIntro(state.roomIndex).join("\n\n"))
+        }
+        console.log(output.join("\n"))
+        prompt()
+      });
+    }
+    console.log(project.intro.join("\n\n"))
+    console.log("\n---\n")
+    console.log(engine.getRoomIntro(state.roomIndex).join("\n\n"))
+    prompt()
   })
 
 cli.help()
