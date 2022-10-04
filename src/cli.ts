@@ -59,10 +59,12 @@ cli.command('run <file>', 'Runs Text Adventure from a Markdown file')
         if (options.debug) {
           console.debug('[state]', JSON.stringify(other))
         }
+        if (output.length > 0) {
+          console.log(output.join("\n"))
+        }
         if (state.roomIndex !== roomIndex) {
           console.log(engine.getRoomIntro(state.roomIndex).join("\n\n"))
         }
-        console.log(output.join("\n"))
         prompt()
       });
     }
