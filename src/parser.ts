@@ -82,7 +82,7 @@ function parseCode(item: ListItem) {
     const codeItemParagraph = codesListItem.children[0]
     if (codeItemParagraph.type !== 'paragraph') throw new Error('expected paragraph type')
     if (codeItemParagraph.children[0].type !== 'text') throw new Error('expected text type')
-    const codesListItemText = codeItemParagraph.children[0].value.replaceAll('""', '\\"').trim()
+    const codesListItemText = codeItemParagraph.children[0].value.replace(/""/g, '\\"').trim()
     try {
       ops.push(parseOp(codesListItemText))
     } catch (ex) {

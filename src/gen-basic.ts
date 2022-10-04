@@ -7,7 +7,7 @@ class BasicWriter {
   escape(s: string) {
     return '"' + 
       removeDiacritics(s).
-      replaceAll('"', '"CHR$(34)"').replaceAll("\n", '"CHR$(10)CHR$(13)"') + '"'
+      replace(/"/g, '"CHR$(34)"').replace(/\n/g, '"CHR$(10)CHR$(13)"') + '"'
   }
 
   print(s: string) {
