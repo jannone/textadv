@@ -1,6 +1,6 @@
 {
   "name": "textadv",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "description": "Text Adventures generator from Markdown files",
   "main": "dist/index.js",
   "types": "typings/index.d.ts",
