@@ -1,4 +1,4 @@
-import { Code, Project } from './types';
+import { Code, Project } from './types.js';
 import { generateInputVariations, hyphenate, removeDiacritics } from './utils.js';
 
 class BasicWriter {

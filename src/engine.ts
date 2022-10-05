@@ -1,4 +1,4 @@
-import { Op, Project } from "./types";
+import { Op, Project } from "./types.js";
 import { generateInputVariations, removeDiacritics } from "./utils.js";
 
 export interface EngineState {

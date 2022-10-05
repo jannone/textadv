@@ -3,10 +3,10 @@ import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import * as YAML from 'yaml'
 
-import { Root } from 'remark-parse/lib';
 import { ListItem } from 'mdast';
 import { Cmd, Code, Node, Op, Project, Room } from './types.js';
 import { removeDiacritics } from './utils.js';
+import { Root } from 'remark-parse/lib/index.js';
 
 async function parse(ast: Root, project: Project) {
   let inMeta = false

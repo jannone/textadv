@@ -2,11 +2,20 @@
   "name": "textadv",
   "version": "1.4.0",
   "description": "Text Adventures generator from Markdown files",
-  "main": "dist/index.js",
-  "types": "typings/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./typings/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.js"
+    }
+  },
+  "types": "./typings/index.d.ts",
   "type": "module",
   "bin": {
     "textadv": "dist/cli.js"
+  },
+  "engines": {
+    "node": ">=14.16"
   },
   "files": [
     "dist/*",
