@@ -5,7 +5,7 @@ import { writeFileSync } from 'fs';
 import { Engine } from './engine.js';
 import { generateBasic } from './gen-basic.js';
 import { generateJson } from './gen-json.js';
-import { parseFile } from './parser.js';
+import { parseFile, validateProject } from './parser.js';
 import * as readline from 'readline';
 
 const cli = cac('textadv')
@@ -15,6 +15,10 @@ cli.command('gen <file>', 'Generates Text Adventure from a Markdown file')
   .option('--output <file>', 'Output file path')
   .action(async (file, options) => {
     const { project, mdAST } = await parseFile(file)
+    const errors = validateProject(project)
+    if (errors.length > 0) {
+      throw new Error(`Error(s): ${errors.join("\n")}`)
+    }
     let generate
     switch (options.target) {
       case 'ast':

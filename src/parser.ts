@@ -34,11 +34,14 @@ async function parse(ast: Root, project: Project, basePath: string) {
       }
       // location block
       const { id, name } = parseTitle((child.children[0] as any).value)
-      const newRoom = project.findRoomById(id) ?? new Room()
-      newRoom.id = id
-      newRoom.name = name
-      project.rooms.push(newRoom)
-      node = newRoom
+      const existingRoom = project.findRoomById(id)
+      const room = existingRoom ?? new Room()
+      room.id = id
+      room.name = name
+      if (!existingRoom) {
+        project.rooms.push(room)
+      }
+      node = room
     }
     if (child.type === 'paragraph') {
       if (child.children[0]?.type === 'link') {
@@ -63,12 +66,6 @@ async function parse(ast: Root, project: Project, basePath: string) {
       node.postInput.push(...codes)
     }
   }
-
-  const errors = validate(project)
-  if (errors.length > 0) {
-    throw new Error(`Error(s): ${errors.join("\n")}`)
-  }
-
   return project
 }
 
@@ -136,7 +133,7 @@ function parseOp(text: string): Op {
   }
 }
 
-function validate(project: Project) {
+export function validateProject(project: Project) {
   const errors: string[] = []
 
   const rooms = project.getRooms()
