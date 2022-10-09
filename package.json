@@ -1,6 +1,6 @@
 {
   "name": "textadv",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Text Adventures generator from Markdown files",
   "exports": {
     ".": {
@@ -50,10 +50,12 @@
   "jest": {
     "preset": "ts-jest/presets/default-esm",
     "testEnvironment": "node",
-    "extensionsToTreatAsEsm": [".ts"],
+    "extensionsToTreatAsEsm": [
+      ".ts"
+    ],
     "moduleNameMapper": {
       "^(\\.{1,2}/.*)\\.js$": "$1"
-    },    
+    },
     "transform": {
       "^.+\\.tsx?$": [
         "ts-jest",
@@ -61,8 +63,10 @@
           "useESM": true
         }
       ]
-    },    
-    "roots": ["<rootDir>/src/"]
+    },
+    "roots": [
+      "<rootDir>/src/"
+    ]
   },
   "devDependencies": {
     "@types/jest": "^29.1.2",
