@@ -7,8 +7,9 @@ import { ListItem } from 'mdast';
 import { Cmd, Code, Node, Op, Project, Room } from './types.js';
 import { removeDiacritics } from './utils.js';
 import { Root } from 'remark-parse/lib/index.js';
+import path from 'path';
 
-async function parse(ast: Root, project: Project) {
+async function parse(ast: Root, project: Project, basePath: string) {
   let inMeta = false
   let childIndex = 0
   let node: Node = project
@@ -45,7 +46,8 @@ async function parse(ast: Root, project: Project) {
         switch (linkType) {
           case 'extends':
             const url: string = child.children[0]?.url
-            await parseFile(url, project)
+            const newPath = path.join(basePath, url)
+            await parseFile(newPath, project)
             break
           default:
             throw new Error(`Invalid link type "${linkType}"`)
@@ -170,10 +172,11 @@ async function parseMD(path: string) {
   return mdAST
 }
 
-export async function parseFile(path: string, project?: Project) {
-  const mdAST = await parseMD(path)
+export async function parseFile(filePath: string, project?: Project) {
+  const basePath = path.dirname(filePath)
+  const mdAST = await parseMD(filePath)
   return {
-    project: await parse(mdAST, project ?? new Project()),
+    project: await parse(mdAST, project ?? new Project(), basePath),
     mdAST
   }
 }
