@@ -2,7 +2,7 @@
 
 Text Adventures generator from Markdown files.
 
-> Note: this is prototype app without any unit tests.
+> Note: this is prototype app without proper unit tests.
 > Use it at your own risk!
 
 ```
@@ -81,9 +81,9 @@ Each bullet point is matched against the players input. When a match is found, i
 You can have one single bullet-point match against lots of input variations.
 Example:
 ```
-- check dog/beagle/buddy
+- check/examine dog/beagle/buddy
   - "Buddy is moving around the room in a very unusual way"
-- hear sound(s)
+- hear/check sound(s)/noise; pay attention 
   - "This is nothing like you've heard before"
 ```
 

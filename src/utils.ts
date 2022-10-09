@@ -38,26 +38,17 @@ export function hyphenate(s: string) {
 }
 
 export function generateInputVariations(on: string) {
-  const words = on.trim().split(/ +/g)
+  const phrases = on.trim().split(/;/g)
+  return phrases.reduce((prev, cur) => {
+    prev = prev.concat(generatePhraseVariations(cur))
+    return prev
+  }, [] as string[])
+}
+
+function generatePhraseVariations(phrase: string): string[] {
+  const words = phrase.trim().split(/ +/g)
   if (words.length === 0) {
     return []
-  }
-
-  function generateWordVariations(word: string) {
-    const variations = []
-    const manualVariations = word.split('/')
-    for (const manualVariation of manualVariations) {
-      // match expression with format: "book(s)"
-      const autoVariations = manualVariation.match(/^(.+)\((.+)\)$/)
-      if (!autoVariations) {
-        variations.push(manualVariation)
-      } else {
-        // example: "read book" and "read books", very simple
-        variations.push(autoVariations[1])
-        variations.push(autoVariations[1] + autoVariations[2])
-      }
-    }
-    return variations
   }
 
   let variations: string[] = []
@@ -70,10 +61,28 @@ export function generateInputVariations(on: string) {
     const newVariations = []
     for (const variation of variations) {
       for (const wordVariation of wordVariations) {
-        newVariations.push(`${variation} ${wordVariation}`)
+        const prefix = variation.trim().length > 0 ? `${variation} ` : ''
+        newVariations.push(`${prefix}${wordVariation}`)
       }
     }
     variations = newVariations
+  }
+  return variations
+}
+
+function generateWordVariations(word: string) {
+  const variations = []
+  const manualVariations = word.split('/')
+  for (const manualVariation of manualVariations) {
+    // match expression with format: "book(s)"
+    const autoVariations = manualVariation.match(/^(.+)\((.+)\)$/)
+    if (!autoVariations) {
+      variations.push(manualVariation)
+    } else {
+      // example: "book(s)"
+      variations.push(autoVariations[1]) // "book"
+      variations.push(autoVariations[1] + autoVariations[2]) // "books"
+    }
   }
   return variations
 }
