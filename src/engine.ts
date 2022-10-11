@@ -12,6 +12,11 @@ export class Engine {
   constructor(private project: Project) {
   }
 
+  static fromJSON(jsonProject: any) {
+    const project = Project.fromJSON(jsonProject)
+    return new Engine(project)
+  }
+
   start(): EngineState {
     return {
       roomIndex: this.project.initialRoomIndex,
