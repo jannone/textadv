@@ -1,13 +1,11 @@
 import * as fs from 'fs'
-import { unified } from 'unified'
-import remarkParse from 'remark-parse'
 import * as YAML from 'yaml'
-
-import { ListItem } from 'mdast';
-import { Cmd, Code, Node, Op, Project, Room } from './types.js';
-import { removeDiacritics } from './utils.js';
-import { Root } from 'remark-parse/lib/index.js';
-import path from 'path';
+import path from 'path'
+import { ListItem } from 'mdast'
+import { Cmd, Code, Node, Op, Project, Room } from './types.js'
+import { removeDiacritics } from './utils.js'
+import { Root } from 'remark-parse/lib/index.js'
+import { parseMarkdown } from './md-parser.js'
 
 async function parse(ast: Root, project: Project, basePath: string) {
   let inMeta = false
@@ -59,7 +57,9 @@ async function parse(ast: Root, project: Project, basePath: string) {
 
       // otherwise, read as text
       const text = (child.children[0] as any).value
-      node.intro.push(text)
+      if (text) {
+        node.intro.push(text)
+      }
     }
     if (child.type === 'list') {
       const codes = child.children.map((item) => parseCode(item))
@@ -161,17 +161,10 @@ export function validateProject(project: Project) {
   return errors
 }
 
-async function parseMD(path: string) {
-  const src = fs.readFileSync(path, 'utf8')
-  const mdAST = unified()
-    .use(remarkParse)
-    .parse(src);
-  return mdAST
-}
-
 export async function parseFile(filePath: string, project?: Project) {
   const basePath = path.dirname(filePath)
-  const mdAST = await parseMD(filePath)
+  const src = fs.readFileSync(filePath, 'utf8')
+  const mdAST = parseMarkdown(src)
   return {
     project: await parse(mdAST, project ?? new Project(), basePath),
     mdAST

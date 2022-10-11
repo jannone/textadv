@@ -26,7 +26,7 @@
     "prepare": "tsc",
     "start": "tsc && node dist/cli.js",
     "build": "tsc && chmod +x dist/cli.js",
-    "test": "jest"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "keywords": [
     "text",
@@ -57,16 +57,13 @@
       "^(\\.{1,2}/.*)\\.js$": "$1"
     },
     "transform": {
-      "^.+\\.tsx?$": [
+      "^.+\\.[tj]sx?$": [
         "ts-jest",
         {
           "useESM": true
         }
       ]
-    },
-    "roots": [
-      "<rootDir>/src/"
-    ]
+    }
   },
   "devDependencies": {
     "@types/jest": "^29.1.2",

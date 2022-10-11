@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 
 import { cac } from 'cac'
-import { writeFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { Engine } from './engine.js';
 import { generateBasic } from './gen-basic.js';
 import { generateJson } from './gen-json.js';
 import { parseFile, validateProject } from './parser.js';
 import * as readline from 'readline';
+import { parseMarkdown } from './md-parser.js';
 
 const cli = cac('textadv')
 
