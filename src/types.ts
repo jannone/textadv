@@ -28,12 +28,25 @@ export class Room implements Node {
   postInput: Code[] = []
   aliases = {}
   intro = []
+
+  static fromJSON(json: any) {
+    const room = new Room()
+    Object.assign(room, json)
+    return room
+  }
 }
 
 export class Project extends Room {
   rooms: Room[] = []
   initialRoomIndex: number = 0 // TODO: find a way to express "initialRoomIndex" on the markdown
   meta: any
+
+  static fromJSON(json: any) {
+    const project = new Project()
+    Object.assign(project, json)
+    project.rooms = json.rooms.map((room: any) => Room.fromJSON(room))
+    return project
+  }
 
   findRoomById(id: string) {
     for (const room of this.rooms) {
