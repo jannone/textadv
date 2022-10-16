@@ -27,18 +27,18 @@ export class Engine {
   }
 
   getRoomIntro(roomIndex: number): string[] {
-    const room = this.project.getRoom(roomIndex)
+    const room = this.project.getChild(roomIndex)
     return [`[${room.name.trim()}]`, ...room.intro]
   }
 
   input(str: string, state: EngineState): EngineState {
     const newState = {...state}
     newState.output = []
-    const room = this.project.getRoom(state.roomIndex)
+    const room = this.project.getChild(state.roomIndex)
     if (!room) {
       throw new Error(`invalid room ${state.roomIndex}`)
     }
-    const codes = room.postInput.concat(this.project.postInput)
+    const codes = room.onInput.concat(this.project.onInput)
     for (const code of codes) {
       if (this.matchesOn(str, code.on)) {
         let done = true
@@ -87,8 +87,8 @@ export class Engine {
         state.output.push(...this.getRoomIntro(state.roomIndex));
         break
       case "goto":
-        const roomIndex = this.project.rooms.findIndex((room) => room.id === op.params[0]);
-        if (roomIndex === -1) {
+        const roomIndex = this.project.getChildById(String(op.params[0]))?.index
+        if (roomIndex === undefined) {
           throw new Error(`could not find room "${op.params[0]}"`);
         }
         state.roomIndex = roomIndex

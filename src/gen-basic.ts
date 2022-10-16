@@ -1,4 +1,4 @@
-import { Code, Project } from './types.js';
+import { Code, Project, Type } from './types.js';
 import { generateInputVariations, hyphenate, removeDiacritics } from './utils.js';
 
 class BasicWriter {
@@ -109,8 +109,6 @@ export function generateBasic(project: Project) {
   const varSetupRef = basic.getLineRef()
   basic.write("DIM ...")
   basic.write(`RM=${project.initialRoomIndex}`)
-  basic.printLn(project.name)
-  basic.printLn("")
   basic.printLn(project.intro.join("\n\n"))
   basic.printLn("")
   basic.printLn("")
@@ -132,25 +130,32 @@ export function generateBasic(project: Project) {
   // project codes
   basic.write("REM project codes")
   const projectCodesRef = basic.getLineRef()
-  generateCodes(project.postInput, basic, project, roomsOnGosubRef, flags)
+  generateCodes(project.onInput, basic, project, roomsOnGosubRef, flags)
   basic.write("RETURN")
 
   // rooms intros
-  const roomsIntroLines = []
-  for (const room of project.rooms) {
-    roomsIntroLines.push(basic.getLineRef())
-    basic.printLn(`[${room.name}]`)
-    basic.printLn("")
-    basic.printLn(room.intro.join("\n\n"))
+  const introLines = []
+  for (const node of project.children) {
+    introLines.push(basic.getLineRef())
+    if (node.intro.length === 0) {
+      basic.write("RETURN")
+      continue
+    }
+    if (node.type === Type.location) {
+      basic.printLn(`[${node.name}]`)
+      basic.printLn("")  
+    }
+    basic.printLn(node.intro.join("\n\n"))
     basic.write("RETURN")
   }
-  basic.setLine(roomsOnGosubRef, "?:ON RM+1 GOSUB " + roomsIntroLines.join(","))
+  basic.setLine(roomsOnGosubRef, "?:ON RM+1 GOSUB " + introLines.join(","))
   // rooms commands
   const roomsCommandLines = []
-  for (const room of project.rooms) {
+  for (const room of project.children) {
+    if (room.type !== Type.location) continue
     roomsCommandLines.push(basic.getLineRef())
     basic.write(`REM room ${room.id} codes`)
-    generateCodes(room.postInput, basic, project, roomsOnGosubRef, flags)
+    generateCodes(room.onInput, basic, project, roomsOnGosubRef, flags)
     basic.write(`GOTO ${projectCodesRef}`)
   }
   basic.setLine(roomCmdOnGosubRef, "ON RM+1 GOSUB " + roomsCommandLines.join(","))
@@ -175,8 +180,8 @@ function generateCodes(codes: Code[], basic: BasicWriter, project: Project, chec
           basic.write(`RETURN ${checkRoomLine}`);
           break
         case "goto":
-          const roomIndex = project.rooms.findIndex((room) => room.id === op.params[0]);
-          if (roomIndex === -1) {
+          const roomIndex = project.getChildById(String(op.params[0]))?.index;
+          if (roomIndex === undefined) {
             throw new Error(`could not find room "${op.params[0]}"`);
           }
           basic.write(`RM=${roomIndex}`);

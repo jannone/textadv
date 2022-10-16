@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import * as YAML from 'yaml'
 import path from 'path'
 import { ListItem } from 'mdast'
-import { Cmd, Code, Node, Op, Project, Room } from './types.js'
+import { Cmd, Code, Node, Op, Project, Type } from './types.js'
 import { removeDiacritics } from './utils.js'
 import { Root } from 'remark-parse/lib/index.js'
 import { parseMarkdown } from './md-parser.js'
@@ -10,6 +10,7 @@ import { parseMarkdown } from './md-parser.js'
 async function parse(ast: Root, project: Project, basePath: string) {
   let inMeta = false
   let childIndex = 0
+  let section: Type = Type.project
   let node: Node = project
   if (ast.type !== 'root') throw new Error('expected root node as parameter')
   for (const child of ast.children) {
@@ -19,10 +20,23 @@ async function parse(ast: Root, project: Project, basePath: string) {
       continue
     }
     if (child.type === 'heading' && child.depth === 1) {
-      // intro block
-      const { id, name } = parseTitle((child.children[0] as any).value)
-      project.id = id
-      project.name = name
+      const type = (child.children[0] as any).value.trim().toLocaleLowerCase()
+      switch (type) {
+        case 'project':
+          section = Type.project
+         break
+        case 'locations':
+          section = Type.location
+         break
+        case 'objects':
+          section = Type.object
+          break
+        default:
+          throw new Error(`Unknown section: ${type}`)
+      }
+      // const { id, name } = parseTitle((child.children[0] as any).value)
+      // project.id = id
+      // project.name = name
     }
     if (child.type === 'heading' && child.depth === 2) {
       if (inMeta) {
@@ -30,16 +44,14 @@ async function parse(ast: Root, project: Project, basePath: string) {
         project.meta = parseMeta((child.children[0] as any).value)
         continue
       }
-      // location block
-      const { id, name } = parseTitle((child.children[0] as any).value)
-      const existingRoom = project.findRoomById(id)
-      const room = existingRoom ?? new Room()
-      room.id = id
-      room.name = name
-      if (!existingRoom) {
-        project.rooms.push(room)
+      if (section !== Type.project) {
+        const { id, name } = parseTitle((child.children[0] as any).value)
+        const room = project.addChild(section, id)
+        room.name = name
+        node = room
+      } else {
+        node = project
       }
-      node = room
     }
     if (child.type === 'paragraph') {
       if (child.children[0]?.type === 'link') {
@@ -63,7 +75,7 @@ async function parse(ast: Root, project: Project, basePath: string) {
     }
     if (child.type === 'list') {
       const codes = child.children.map((item) => parseCode(item))
-      node.postInput.push(...codes)
+      node.onInput.push(...codes)
     }
   }
   return project
@@ -136,7 +148,7 @@ function parseOp(text: string): Op {
 export function validateProject(project: Project) {
   const errors: string[] = []
 
-  const rooms = project.getRooms()
+  const rooms = project.getChildrenByType(Type.location)
 
   function validateCodes(codes: Code[]) {
     for (const code of codes) {
@@ -151,11 +163,9 @@ export function validateProject(project: Project) {
     }
   }
 
-  validateCodes(project.preInput)
-  validateCodes(project.postInput)
-  for (const room of project.rooms) {
-    validateCodes(room.preInput)
-    validateCodes(room.postInput)
+  validateCodes(project.onInput)
+  for (const room of project.children) {
+    validateCodes(room.onInput)
   }
 
   return errors

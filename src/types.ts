@@ -9,62 +9,92 @@ export interface Op {
 export interface Code {
   on: string,
   ops: Op[],
-  done: boolean,
+}
+
+export enum Type {
+  project = 'project',
+  location = 'location',
+  object = 'object',
 }
 
 export interface Node {
+  type: Type,
   id: string,
   name: string,
-  preInput: Code[], // TODO: find a way to express "preInput" on the markdown
-  postInput: Code[],
-  aliases: {[key: string]: string[]}, // TODO: find a way to express "aliases" on the markdown
+  onInput: Code[],
   intro: string[],
 }
 
-export class Room implements Node {
+export class Project implements Node {
+  type = Type.project
   id = ''
   name = ''
-  preInput = []
-  postInput: Code[] = []
-  aliases = {}
+  onInput = []
   intro = []
 
-  static fromJSON(json: any) {
-    const room = new Room()
-    Object.assign(room, json)
-    return room
-  }
-}
-
-export class Project extends Room {
-  rooms: Room[] = []
+  children: Node[] = []
   initialRoomIndex: number = 0 // TODO: find a way to express "initialRoomIndex" on the markdown
   meta: any
 
   static fromJSON(json: any) {
     const project = new Project()
     Object.assign(project, json)
-    project.rooms = json.rooms.map((room: any) => Room.fromJSON(room))
     return project
   }
 
-  findRoomById(id: string) {
-    for (const room of this.rooms) {
-      if (room.id === id) {
-        return room
+  addChild(type: Type, id: string): Node {
+    let child = this.findChildById(id)
+    if (child && child.type !== type) {
+      throw new Error(`Duplicate node ${id} with different type`)
+    }
+    if (!child) {
+      child = {
+        type,
+        id,
+        name: id,
+        onInput: [],
+        intro: [],
+      }
+      this.children.push(child)
+    }
+    return child
+  }
+
+  findChildById(id: string) {
+    for (const child of this.children) {
+      if (child.id === id) {
+        return child
       }
     }
   }
 
-  getRooms() {
-    return this.rooms.reduce((prev, cur) => {
-      prev[cur.id] = cur
-      return prev
-    }, {} as { [key: string]: Room; })
+  getChildren() {
+    return this.children
+      .map((child, index) => ({...child, index }))
+      .reduce((prev, cur) => {
+        prev[cur.id] = cur
+        return prev
+      }, {} as { [key: string]: Node & {index: number}; })
   }
 
-  getRoom(index: number): Room {
-    return this.rooms[index]
+  getChildrenByType(type: Type) {
+    return this.children
+      .map((child, index) => ({...child, index }))
+      .filter((child) => child.type === type)
+      .reduce((prev, cur) => {
+        prev[cur.id] = cur
+        return prev
+      }, {} as { [key: string]: Node & {index: number}; })
+  }
+
+  getChild(index: number): Node {
+    return this.children[index]
+  }
+
+  getChildById(id: string): Node & {index: number} | undefined {
+    return this.children
+      .map((child, index) => ({...child, index }))
+      .find((child) => child.id === id)
   }
 }
 
