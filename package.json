@@ -1,6 +1,6 @@
 {
   "name": "textadv",
-  "version": "1.7.0",
+  "version": "2.0.0",
   "description": "Text Adventures generator from Markdown files",
   "exports": {
     ".": {
