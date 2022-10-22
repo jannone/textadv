@@ -109,6 +109,8 @@ export function generateBasic(project: Project) {
   const varSetupRef = basic.getLineRef()
   basic.write("DIM ...")
   basic.write(`RM=${project.initialRoomIndex}`)
+  basic.printLn(project.name)
+  basic.printLn("")  
   basic.printLn(project.intro.join("\n\n"))
   basic.printLn("")
   basic.printLn("")

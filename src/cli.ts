@@ -72,6 +72,7 @@ cli.command('run <file>', 'Runs Text Adventure from a Markdown file')
         prompt()
       });
     }
+    console.log(`[${project.name}]\n`)    
     console.log(project.intro.join("\n\n"))
     console.log("\n---\n")
     console.log(engine.getRoomIntro(state.roomIndex).join("\n\n"))
