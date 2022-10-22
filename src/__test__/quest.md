@@ -1,4 +1,4 @@
-# Test Project
+# Project
 
 This is a test project.
 

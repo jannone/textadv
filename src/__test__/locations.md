@@ -1,4 +1,4 @@
-## Test Location
+## 📍 Test Location
 
 This is a test location.
 
@@ -9,7 +9,7 @@ You can go to another place south.
 - go/ another/place; south
   - goto another
 
-## Another Location [another]
+## 📍 Another Location [another]
 
 Yeah, this is another location.
 

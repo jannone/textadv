@@ -1,4 +1,4 @@
-## Tutorial location
+## 📍 Tutorial location
 
 This is the tutorial location.
 

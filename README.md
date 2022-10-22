@@ -45,9 +45,9 @@ author: John Doe <john.doe@example.com>
 
 ### Locations
 
-Declare each location as a second-level text:
+Declare each location as a second-level text with a pin emoji:
 ```
-## Uncle's house
+## 📍 Uncle's house
 
 You are at your uncle's house.
 
@@ -57,7 +57,7 @@ The dog is restless and you hear a sound coming from the kitchen.
 Sometimes you'll prefer to use a short identifier for your location (when using the `goto` command, for instance). This can be done via the `[...]` marker as seen below:
 
 ```
-## Uncle's Kitchen [kitchen]
+## 📍 Uncle's Kitchen [kitchen]
 
 There is no one here...
 
@@ -116,6 +116,10 @@ Check's reference list:
 
 - zero \<flag>: Check if the flag equals 0
 - notzero \<flag>: Check if the flag is different from 0 
+
+### Objects
+
+TODO
 
 ## Using multiple files
 

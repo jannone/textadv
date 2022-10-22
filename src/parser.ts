@@ -10,7 +10,6 @@ import { parseMarkdown } from './md-parser.js'
 async function parse(ast: Root, project: Project, basePath: string) {
   let inMeta = false
   let childIndex = 0
-  let section: Type = Type.project
   let node: Node = project
   if (ast.type !== 'root') throw new Error('expected root node as parameter')
   for (const child of ast.children) {
@@ -20,23 +19,11 @@ async function parse(ast: Root, project: Project, basePath: string) {
       continue
     }
     if (child.type === 'heading' && child.depth === 1) {
-      const type = (child.children[0] as any).value.trim().toLocaleLowerCase()
-      switch (type) {
-        case 'project':
-          section = Type.project
-         break
-        case 'locations':
-          section = Type.location
-         break
-        case 'objects':
-          section = Type.object
-          break
-        default:
-          throw new Error(`Unknown section: ${type}`)
-      }
-      // const { id, name } = parseTitle((child.children[0] as any).value)
-      // project.id = id
-      // project.name = name
+      // project data
+      const { id, name } = parseTitle((child.children[0] as any).value)
+      project.id = id
+      project.name = name
+      node = project
     }
     if (child.type === 'heading' && child.depth === 2) {
       if (inMeta) {
@@ -44,14 +31,13 @@ async function parse(ast: Root, project: Project, basePath: string) {
         project.meta = parseMeta((child.children[0] as any).value)
         continue
       }
-      if (section !== Type.project) {
-        const { id, name } = parseTitle((child.children[0] as any).value)
-        const room = project.addChild(section, id)
-        room.name = name
-        node = room
-      } else {
-        node = project
+      const { id, name, type } = parseTitle((child.children[0] as any).value)
+      if (!type) {
+        throw new Error(`Missing heading type on "${name}"`)
       }
+      const room = project.addChild(type, id)
+      room.name = name
+      node = room
     }
     if (child.type === 'paragraph') {
       if (child.children[0]?.type === 'link') {
@@ -109,15 +95,24 @@ function parseCode(item: ListItem) {
 }
 
 function parseTitle(title: string) {
+  let type, m
   title = title.trim()
-  let m
+  if (m = title.match(/^📍(.+)$/)) {
+    type = Type.location
+    title = m[1].trim()
+  } else if (m = title.match(/^📦(.+)$/)) {
+    type = Type.object
+    title = m[1].trim()
+  }
   if (m = title.match(/^([^\[]+)\[([^\]]+)\]$/)) {
     return {
+      type,
       name: m[1],
       id: m[2],
     }
   }
   return {
+    type,
     name: title,
     id: removeDiacritics(title).toLocaleLowerCase().replace(/[^a-z0-9]+/g, '-')
   }
